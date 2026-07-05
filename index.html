@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>風月暦 ふうげつごよみ ― 七十二候と千年のことばで、あなたを読む</title>
+<meta property="og:title" content="風月暦 ふうげつごよみ">
+<meta property="og:description" content="あなたが生まれた日、日本の暦は何を告げていたか。七十二候と千年のことばで占う。">
+<meta property="og:image" content="https://fugetsu.koyomi-japan.com/img/ogp.jpg">
+<meta property="og:url" content="https://fugetsu.koyomi-japan.com/">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --shiro:#FFFFFF;
+    --sumi:#1F1F1C;
+    --kei:#D9D6CE;      /* 罫線 */
+    --hi:#C8321E;       /* 若冲の緋 */
+    --kincha:#A08A52;   /* 金茶ラベル */
+    --usuzumi:#5A5A52;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--shiro);color:var(--sumi);
+    font-family:'Shippori Mincho',serif;line-height:2;
+    font-size:16px;
+  }
+  .wrap{max-width:720px;margin:0 auto;padding:0 22px;}
+
+  /* ヘッダー */
+  header.site{
+    border-bottom:1px solid var(--kei);
+    padding:14px 0;
+  }
+  .site-inner{display:flex;align-items:center;justify-content:space-between;}
+  .logo{font-size:20px;font-weight:700;letter-spacing:.3em;}
+  .logo .kan{color:var(--hi);}
+  nav.g{font-family:'Zen Kaku Gothic New',sans-serif;font-size:12px;letter-spacing:.12em;}
+  nav.g a{color:var(--usuzumi);text-decoration:none;margin-left:18px;}
+  nav.g a:hover{color:var(--hi);}
+
+  /* ヒーロー */
+  .hero{
+    display:flex;gap:28px;align-items:stretch;
+    padding:52px 0 46px;border-bottom:1px solid var(--kei);
+  }
+  .hero-title{
+    writing-mode:vertical-rl;
+    font-size:clamp(46px,11vw,68px);font-weight:500;letter-spacing:.3em;
+    line-height:1.3;flex-shrink:0;
+  }
+  .hero-title small{
+    display:block;font-size:13px;letter-spacing:.5em;color:var(--kincha);
+    margin-left:10px;font-weight:400;
+  }
+  .hero-body{flex:1;display:flex;flex-direction:column;justify-content:center;}
+  .hero-copy{font-size:16px;line-height:2.3;letter-spacing:.06em;}
+  .hero-eyebrow{
+    font-family:'Zen Kaku Gothic New',sans-serif;font-size:11px;
+    letter-spacing:.35em;color:var(--hi);margin-bottom:16px;
+  }
+  .hero-art{display:none;flex-shrink:0;width:38%;}
+  .hero-art.show{display:block;}
+  .hero-art img{width:100%;height:100%;object-fit:cover;display:block;}
+  .hero-art-credit{
+    font-family:'Zen Kaku Gothic New',sans-serif;font-size:10px;
+    color:var(--usuzumi);margin-top:6px;letter-spacing:.05em;
+  }
+
+  /* セクション見出し(和樂風:小ゴシック+罫) */
+  .sec-head{
+    display:flex;align-items:center;gap:14px;
+    margin:52px 0 26px;
+  }
+  .sec-head .label{
+    font-family:'Zen Kaku Gothic New',sans-serif;
+    font-size:12px;font-weight:700;letter-spacing:.35em;
+    color:var(--sumi);white-space:nowrap;
+  }
+  .sec-head .label span{color:var(--hi);margin-right:8px;}
+  .sec-head::after{content:"";height:1px;background:var(--kei);flex:1;}
+
+  /* フォーム */
+  .form-block{padding:6px 0 8px;}
+  .date-row{display:flex;gap:10px;margin-top:6px;}
+  select{
+    flex:1;appearance:none;border-radius:0;
+    font-family:'Shippori Mincho',serif;font-size:17px;color:var(--sumi);
+    background:var(--shiro);border:1px solid var(--sumi);
+    padding:13px 8px;text-align:center;
+  }
+  select:focus{outline:2px solid var(--hi);outline-offset:1px;}
+  button.uranau{
+    display:block;width:100%;margin-top:16px;
+    font-family:'Shippori Mincho',serif;font-size:18px;
+    letter-spacing:.6em;text-indent:.6em;
+    color:var(--shiro);background:var(--hi);border:none;
+    padding:16px 0;cursor:pointer;transition:opacity .2s;
+  }
+  button.uranau:hover{opacity:.88;}
+  button.uranau:focus-visible{outline:2px solid var(--sumi);outline-offset:2px;}
+
+  /* 結果 */
+  #result{display:none;animation:appear .8s ease both;}
+  @keyframes appear{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:none;}}
+  @media(prefers-reduced-motion:reduce){#result{animation:none;}}
+  .kou-header{text-align:center;margin-top:8px;}
+  .sekki-label{font-family:'Zen Kaku Gothic New',sans-serif;font-size:12px;letter-spacing:.3em;color:var(--kincha);}
+  .kou-name{font-size:clamp(34px,8vw,46px);letter-spacing:.14em;font-weight:500;margin:8px 0 4px;}
+  .kou-yomi{font-size:14px;letter-spacing:.3em;color:var(--usuzumi);}
+
+  .art-frame{display:none;margin:30px auto 0;max-width:420px;}
+  .art-frame.show{display:block;}
+  .art-frame img{width:100%;display:block;border:1px solid var(--kei);}
+  .art-credit{
+    font-family:'Zen Kaku Gothic New',sans-serif;font-size:11px;
+    color:var(--usuzumi);text-align:center;margin-top:8px;letter-spacing:.04em;
+  }
+
+  .tanzaku-wrap{display:flex;justify-content:center;margin:34px 0 8px;}
+  .tanzaku{
+    writing-mode:vertical-rl;position:relative;
+    background:var(--shiro);
+    border:1px solid var(--sumi);
+    padding:34px 26px 62px;min-height:330px;
+  }
+  .tanzaku .poem{font-size:21px;letter-spacing:.28em;line-height:2.4;font-weight:500;}
+  .tanzaku .author{font-size:13px;color:var(--usuzumi);letter-spacing:.2em;margin-top:auto;}
+  .rakkan{
+    position:absolute;bottom:14px;left:12px;writing-mode:horizontal-tb;
+    width:34px;height:34px;background:var(--hi);color:#fff;
+    font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;
+    border-radius:2px;
+  }
+
+  .honshitsu-copy{font-size:22px;letter-spacing:.08em;font-weight:500;margin-bottom:10px;line-height:1.8;}
+  p.body-text{font-size:17px;color:#33332e;}
+  .suuhi-tag{
+    display:inline-block;margin-top:14px;
+    font-family:'Zen Kaku Gothic New',sans-serif;font-size:13px;
+    color:var(--sumi);border:1px solid var(--kei);
+    padding:5px 14px;letter-spacing:.12em;
+  }
+  .kyou-box{border:1px solid var(--kei);padding:24px 22px;margin-top:4px;}
+  .kyou-kou{font-family:'Zen Kaku Gothic New',sans-serif;font-size:13px;color:var(--usuzumi);letter-spacing:.08em;margin-bottom:8px;}
+  .kyou-level{font-size:24px;letter-spacing:.2em;color:var(--hi);font-weight:700;margin-bottom:8px;}
+
+  /* シェア */
+  .share-grid{
+    display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px;
+  }
+  .share-grid a,.share-grid button{
+    font-family:'Zen Kaku Gothic New',sans-serif;font-size:13px;letter-spacing:.08em;
+    padding:13px 6px;text-align:center;cursor:pointer;text-decoration:none;
+    border:1px solid var(--sumi);background:var(--shiro);color:var(--sumi);
+    transition:background .2s,color .2s;
+  }
+  .share-grid a:hover,.share-grid button:hover{background:var(--sumi);color:var(--shiro);}
+  .share-grid .save-card{border-color:var(--hi);color:var(--hi);}
+  .share-grid .save-card:hover{background:var(--hi);color:#fff;}
+  .share-note{
+    font-family:'Zen Kaku Gothic New',sans-serif;font-size:11px;
+    color:var(--usuzumi);margin-top:10px;letter-spacing:.05em;line-height:1.8;
+  }
+  .retry{margin-top:22px;text-align:center;}
+  .retry button{
+    background:none;border:none;font-family:'Shippori Mincho',serif;
+    font-size:14px;color:var(--usuzumi);text-decoration:underline;cursor:pointer;
+  }
+
+  /* 七十二候一覧(雑誌の目次風) */
+  .season-label{
+    font-size:15px;font-weight:700;letter-spacing:.4em;color:var(--hi);
+    margin:26px 0 10px;
+  }
+  .kou-grid{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--kei);border-left:1px solid var(--kei);}
+  .kou-cell{
+    border-right:1px solid var(--kei);border-bottom:1px solid var(--kei);
+    padding:16px 10px;text-align:center;cursor:pointer;background:var(--shiro);
+    transition:background .15s;
+  }
+  .kou-cell:hover{background:#FAF8F3;}
+  .kou-cell .n{font-size:17px;letter-spacing:.1em;font-weight:500;}
+  .kou-cell .y{font-family:'Zen Kaku Gothic New',sans-serif;font-size:10px;color:var(--usuzumi);margin-top:4px;letter-spacing:.04em;}
+  .kou-cell .d{font-family:'Zen Kaku Gothic New',sans-serif;font-size:10px;color:var(--kincha);margin-top:2px;}
+
+  /* 四季章扉(若冲) */
+  .season-banner{
+    display:flex;gap:16px;align-items:center;
+    margin:30px 0 12px;
+  }
+  .season-banner img{
+    width:110px;height:82px;object-fit:cover;
+    border:1px solid var(--kei);flex-shrink:0;
+  }
+  .season-banner .season-label{margin:0;}
+  .season-banner .season-credit{
+    font-family:'Zen Kaku Gothic New',sans-serif;
+    font-size:10px;color:var(--usuzumi);margin-top:4px;letter-spacing:.03em;
+  }
+
+  /* 特別演出(大吉=鳳凰/誕生日=白鳳) */
+  .tokubetsu{display:none;margin:34px auto 0;max-width:420px;text-align:center;
+    border:2px solid var(--hi);padding:22px 18px;}
+  .tokubetsu.show{display:block;animation:appear 1.2s ease both;}
+  .tokubetsu img{width:100%;display:block;border:1px solid var(--kei);}
+  .tokubetsu .t-label{
+    font-size:20px;font-weight:700;letter-spacing:.3em;color:var(--hi);
+    margin-bottom:12px;
+  }
+  .tokubetsu .t-text{font-size:15px;line-height:2;margin-top:12px;color:#33332e;}
+  .tokubetsu .t-credit{
+    font-family:'Zen Kaku Gothic New',sans-serif;
+    font-size:10px;color:var(--usuzumi);margin-top:8px;letter-spacing:.03em;
+  }
+
+  /* 監修 */
+  .kanshu{border:1px solid var(--kei);padding:24px 22px;display:flex;gap:16px;align-items:center;}
+  .kanshu .in{width:56px;height:56px;border-radius:50%;background:var(--hi);color:#fff;
+    display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;flex-shrink:0;}
+  .kanshu .name{font-size:16px;font-weight:700;letter-spacing:.1em;}
+  .kanshu .bio{font-family:'Zen Kaku Gothic New',sans-serif;font-size:12px;color:var(--usuzumi);line-height:1.9;}
+
+  footer.site{
+    margin-top:64px;border-top:1px solid var(--kei);
+    padding:28px 0 44px;text-align:center;
+    font-family:'Zen Kaku Gothic New',sans-serif;
+    font-size:11px;color:var(--usuzumi);letter-spacing:.15em;line-height:2.2;
+  }
+
+  @media(max-width:560px){
+    .hero{flex-direction:row;gap:18px;padding:38px 0 34px;}
+    .hero-art{display:none !important;}
+    .hero-copy{font-size:15px;}
+    .kou-grid{grid-template-columns:repeat(2,1fr);}
+  }
+</style>
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap site-inner">
+    <div class="logo">風月<span class="kan">暦</span></div>
+    <nav class="g">
+      <a href="#uranai">占う</a>
+      <a href="#ichiran">候の一覧</a>
+      <a href="#about">この暦占について</a>
+    </nav>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- ヒーロー -->
+  <section class="hero">
+    <h1 class="hero-title">風月暦<small>ふうげつごよみ</small></h1>
+    <div class="hero-body">
+      <div class="hero-eyebrow">和暦 × 七十二候 × 古典のことば</div>
+      <p class="hero-copy">あなたが生まれた日、日本の暦は何を告げていたか。五日ごとに移ろう七十二の季節と、千年のことばが、あなたの本質を映します。</p>
+    </div>
+    <div class="hero-art" id="heroArt">
+      <img id="heroImg" src="img/hero.jpg" alt="伊藤若冲の絵">
+      <div class="hero-art-credit" id="heroCredit">伊藤若冲(メトロポリタン美術館蔵・CC0)</div>
+    </div>
+  </section>
+
+  <!-- 占うフォーム -->
+  <section id="uranai">
+    <div class="sec-head"><div class="label"><span>一</span>生まれた日で占う</div></div>
+    <div class="form-block">
+      <div class="date-row">
+        <select id="year" aria-label="年"></select>
+        <select id="month" aria-label="月"></select>
+        <select id="day" aria-label="日"></select>
+      </div>
+      <button class="uranau" onclick="uranau()">占う</button>
+    </div>
+  </section>
+
+  <!-- 結果 -->
+  <section id="result">
+    <div class="sec-head"><div class="label"><span>結</span>あなたの候</div></div>
+    <div class="kou-header">
+      <div class="sekki-label" id="sekkiLabel"></div>
+      <div class="kou-name" id="kouName"></div>
+      <div class="kou-yomi" id="kouYomi"></div>
+    </div>
+
+    <div class="art-frame" id="artFrame">
+      <img id="artImg" src="" alt="" crossorigin="anonymous">
+      <div class="art-credit" id="artCredit"></div>
+    </div>
+
+    <div class="tanzaku-wrap">
+      <div class="tanzaku">
+        <div class="poem" id="poem"></div>
+        <div class="author" id="poemAuthor"></div>
+        <div class="rakkan">風月</div>
+      </div>
+    </div>
+
+    <div class="sec-head"><div class="label"><span>質</span>あなたの本質</div></div>
+    <div class="honshitsu-copy" id="honshitsuCopy"></div>
+    <p class="body-text" id="honshitsuBody"></p>
+    <span class="suuhi-tag" id="suuhiTag"></span>
+
+    <div class="sec-head"><div class="label"><span>今</span>今日の運勢</div></div>
+    <div class="kyou-box">
+      <div class="kyou-kou" id="kyouKou"></div>
+      <div class="kyou-level" id="kyouLevel"></div>
+      <p class="body-text" id="kyouBody"></p>
+    </div>
+
+    <div class="tokubetsu" id="tokubetsu">
+      <div class="t-label" id="tLabel"></div>
+      <img id="tImg" src="" alt="">
+      <div class="t-credit" id="tCredit"></div>
+      <div class="t-text" id="tText"></div>
+    </div>
+
+    <div class="sec-head"><div class="label"><span>伝</span>結果をわかちあう</div></div>
+    <div class="share-grid">
+      <a id="shareX" href="#" target="_blank" rel="noopener">Xでシェア</a>
+      <a id="shareLine" href="#" target="_blank" rel="noopener">LINEで送る</a>
+      <button id="shareOS" onclick="osShare()">ほかのアプリで共有</button>
+      <button class="save-card" onclick="saveCard()">結果カードを保存</button>
+    </div>
+    <p class="share-note">「結果カードを保存」で、この結果が一枚の画像になります。InstagramのストーリーズやTikTokには、保存したカード画像を投稿してください。</p>
+
+    <div class="retry"><button onclick="resetView()">もう一度占う</button></div>
+  </section>
+
+  <!-- 候の一覧 -->
+  <section id="ichiran">
+    <div class="sec-head"><div class="label"><span>覧</span>候の一覧 ― ほかの季節に生まれた人</div></div>
+    <div id="kouList"></div>
+  </section>
+
+  <!-- 監修 -->
+  <section id="about">
+    <div class="sec-head"><div class="label"><span>監</span>この暦占について</div></div>
+    <div class="kanshu">
+      <div class="in">風</div>
+      <div>
+        <div class="name">風月暦 編集室</div>
+        <div class="bio">七十二候・二十四節気と日本の古典文学をもとに構成しています。絵は歌川広重「名所江戸百景」(国立国会図書館蔵・保護期間満了)、和歌・俳句はすべて古典(著作権保護期間満了)から引いています。</div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<footer class="site">
+  風月暦 ふうげつごよみ ― 日本の暦とことばを、次の千年へ。<br>
+  掲載の絵画・和歌はすべてパブリックドメインです。
+</footer>
+
+<canvas id="cardCanvas" width="1080" height="1920" style="display:none;"></canvas>
+
+<script>
+// ===== 十二候データ(72候拡張予定・現在は各節気の代表候) =====
+const KOU = [
+  {season:"春",sekki:"立春",name:"東風解凍",yomi:"はるかぜ こおりを とく",range:[204,305],dateLabel:"2/4-3/5",
+   essence:"氷を解かす人",
+   body:"長く固まっていたものを、静かにほどいていく力を持っています。強引に壊すのではなく、東風のようにあたたかさで変化を起こすタイプ。停滞した場に、あなたが入ると空気が動きはじめます。",
+   poem:"東風吹かば にほひおこせよ 梅の花 あるじなしとて 春な忘れそ", author:"菅原道真", lucky:"梅", art:"亀戸梅屋舗"},
+  {season:"春",sekki:"啓蟄",name:"蟄虫啓戸",yomi:"すごもりむし とを ひらく",range:[306,404],dateLabel:"3/6-4/4",
+   essence:"目覚めを告げる人",
+   body:"眠っていた才能や可能性に、いち早く気づく人です。自分自身も、周囲の人の中に眠るものも。あなたの一言が、誰かの「戸」を開くきっかけになります。焦らず、時が満ちるのを待てる強さも持っています。",
+   poem:"山路来て 何やらゆかし すみれ草", author:"松尾芭蕉", lucky:"すみれ", art:"上野清水堂不忍ノ池"},
+  {season:"春",sekki:"清明",name:"玄鳥至",yomi:"つばめ きたる",range:[405,505],dateLabel:"4/5-5/5",
+   essence:"春を運ぶ人",
+   body:"燕が春を連れてくるように、あなたが現れると場が明るくなります。行動力があり、遠くまで飛んでいける人。ただし燕が毎年同じ軒に帰るように、帰る場所を大切にすることで、さらに遠くへ行けます。",
+   poem:"世の中に たえて桜の なかりせば 春の心は のどけからまし", author:"在原業平", lucky:"桜", art:"玉川堤の花"},
+  {season:"夏",sekki:"立夏",name:"蛙始鳴",yomi:"かわず はじめて なく",range:[506,605],dateLabel:"5/6-6/5",
+   essence:"最初に声をあげる人",
+   body:"誰も口を開かない場面で、最初に鳴く蛙のような勇気を持っています。あなたの声が合図となり、周囲が続きます。目立つことが目的ではなく、「誰かが言わねば」という責任感が源。その一声は、思っている以上に遠くまで届いています。",
+   poem:"古池や 蛙飛びこむ 水の音", author:"松尾芭蕉", lucky:"若葉", art:"亀戸天神境内"},
+  {season:"夏",sekki:"芒種",name:"腐草為螢",yomi:"くされたるくさ ほたると なる",range:[606,706],dateLabel:"6/6-7/6",
+   essence:"闇に光を生む人",
+   body:"朽ちた草から螢が生まれると、昔の人は考えました。あなたは困難や失敗を、光に変えられる人です。暗い時期を経験した分だけ、灯せる明かりが増えていく。あなたの静かな光は、夜道を行く誰かの目印になっています。",
+   poem:"もの思へば 沢の蛍も わが身より あくがれ出づる 魂かとぞ見る", author:"和泉式部", lucky:"螢", art:"大はしあたけの夕立"},
+  {season:"夏",sekki:"小暑",name:"蓮始開",yomi:"はす はじめて ひらく",range:[707,807],dateLabel:"7/7-8/7",
+   essence:"泥中に花咲く人",
+   body:"蓮は泥の中から茎を伸ばし、水面の上で花を開きます。あなたは環境のせいにせず、どんな場所からでも美しいものを咲かせられる人。今いる場所が濁って見えても、それはあなたの花のための養分です。",
+   poem:"蓮の香や 水をはなるる 茎二寸", author:"与謝蕪村", lucky:"蓮", art:"両国花火"},
+  {season:"秋",sekki:"立秋",name:"涼風至",yomi:"すずかぜ いたる",range:[808,907],dateLabel:"8/8-9/7",
+   essence:"変化の兆しを読む人",
+   body:"真夏の暑さの中に、秋の気配を最初に感じ取る。あなたは目に見えない変化の兆しに敏感な人です。周囲がまだ気づかない流れを察知し、静かに準備を始められる。その先読みの力は、大きな財産です。",
+   poem:"秋来ぬと 目にはさやかに 見えねども 風の音にぞ おどろかれぬる", author:"藤原敏行", lucky:"風鈴", art:"京橋竹がし"},
+  {season:"秋",sekki:"白露",name:"草露白",yomi:"くさのつゆ しろし",range:[908,1007],dateLabel:"9/8-10/7",
+   essence:"小さな美を見つける人",
+   body:"草の上の露が白く光る、その一瞬に気づける人です。誰もが見過ごす日常の中に、宝物を見つける目を持っています。派手さより深さ。あなたが「きれいだ」と言ったものは、時間が経つほど価値を増します。",
+   poem:"白露に 風の吹きしく 秋の野は つらぬきとめぬ 玉ぞ散りける", author:"文屋朝康", lucky:"露草", art:"猿わか町よるの景"},
+  {season:"秋",sekki:"寒露",name:"鴻雁来",yomi:"こうがん きたる",range:[1008,1107],dateLabel:"10/8-11/7",
+   essence:"約束を守って還る人",
+   body:"雁は毎年、約束のように同じ空を渡ってきます。あなたは信頼の人。一度交わした約束、一度築いた関係を、長い時間をかけて守り続けます。列をなして飛ぶ雁のように、仲間と共に遠くを目指すとき、最も力を発揮します。",
+   poem:"山は暮れて 野は黄昏の 薄かな", author:"与謝蕪村", lucky:"薄", art:"月の岬"},
+  {season:"冬",sekki:"立冬",name:"山茶始開",yomi:"つばき はじめて ひらく",range:[1108,1206],dateLabel:"11/8-12/6",
+   essence:"冬に咲く人",
+   body:"花の少ない初冬に、山茶花はひっそりと咲きはじめます。あなたは皆が縮こまる時期にこそ、力を発揮する人。逆境や閑散期を恐れず、むしろ「今なら自分の花が目立つ」と考えられる。その静かな強さが、人を惹きつけます。",
+   poem:"旅人と 我が名呼ばれん 初時雨", author:"松尾芭蕉", lucky:"山茶花", art:"浅草田甫酉の町詣"},
+  {season:"冬",sekki:"大雪",name:"閉塞成冬",yomi:"そら さむく ふゆと なる",range:[1207,105],dateLabel:"12/7-1/5",
+   essence:"内に力を蓄える人",
+   body:"天地が閉じ、本格的な冬になる候。あなたは外に向かって騒ぐより、内側に深く力を蓄えるタイプです。沈黙は停滞ではなく、準備。雪の下で春を待つ種のように、あなたの中では常に何かが育っています。",
+   poem:"いざさらば 雪見にころぶ 所まで", author:"松尾芭蕉", lucky:"雪", art:"王子装束ゑの木大晦日の狐火"},
+  {season:"冬",sekki:"小寒",name:"芹乃栄",yomi:"せり すなわち さかう",range:[106,203],dateLabel:"1/6-2/3",
+   essence:"寒中に育つ人",
+   body:"厳寒の水辺で、芹は青々と育ちます。あなたは条件の悪さを言い訳にしない人。むしろ厳しい環境でこそ、本来の生命力が発揮されます。七草粥の芹のように、あなたの存在は誰かの一年の始まりを支えています。",
+   poem:"君がため 春の野に出でて 若菜つむ わが衣手に 雪は降りつつ", author:"光孝天皇", lucky:"芹", art:"日本橋雪晴"},
+];
+
+const SUUHI = {
+  1:{name:"開拓",text:"道なき場所に最初の一歩を刻む"},
+  2:{name:"調和",text:"人と人のあいだに橋を架ける"},
+  3:{name:"創造",text:"ことばと発想で世界を彩る"},
+  4:{name:"堅実",text:"積み重ねを裏切らない土台をつくる"},
+  5:{name:"自由",text:"変化の風に乗って軽やかに動く"},
+  6:{name:"慈愛",text:"そばにいる人を静かに支える"},
+  7:{name:"探求",text:"ものごとの奥にある真実を掘る"},
+  8:{name:"実現",text:"描いたものを現実のかたちにする"},
+  9:{name:"包容",text:"すべてを受け入れて円くおさめる"},
+};
+
+const KYOU = [
+  {level:"大吉", text:"生まれの候と今日の候が重なる特別な日。あなたの本質がそのまま追い風になります。迷っていることは、今日決めてよし。"},
+  {level:"吉", text:"季節がひとつ進んだ日。新しい流れの入口にいます。小さな「初めて」をひとつ試すと、思わぬ扉が開きます。"},
+  {level:"中吉", text:"芽吹きの勢いがある日。人に会う予定を優先すると吉。あなたのことばが誰かの背中を押します。"},
+  {level:"吉", text:"成長の途中にある日。結果を急がず、水やりに徹しましょう。積み重ねが後で効いてきます。"},
+  {level:"中吉", text:"満ちていく途中の日。頼まれごとは引き受けて吉。信頼の貯金が増えていきます。"},
+  {level:"小吉", text:"少し立ち止まる日。忙しさの中でも、空を見上げる時間を。見落としていた大事なものに気づけます。"},
+  {level:"吉", text:"生まれの候の正反対にある日。いつもと逆のやり方を試すと、新しい自分が見つかります。あえての遠回りが吉。"},
+  {level:"小吉", text:"実りに向かう調整の日。手放すものを決めると運気が流れ出します。持ち物も予定も、少し軽く。"},
+  {level:"中吉", text:"収穫の気配がある日。過去に蒔いた種から連絡や成果が届きやすい日です。古い縁を大切に。"},
+  {level:"吉", text:"深まりの日。表面的な会話より、一人とじっくり話すことに運があります。聞き役に回ると吉。"},
+  {level:"小吉", text:"蓄えの日。無理に動かず、学びや準備に充てましょう。今日の一頁が、来季のあなたを助けます。"},
+  {level:"中吉", text:"季節が一巡りする直前の日。この一年の自分を振り返ると、次にやるべきことが自然と見えてきます。"},
+];
+
+// ===== ロジック =====
+let current=null; // 直近の結果(カード生成用)
+
+function toMMDD(m,d){return m*100+d;}
+function findKou(m,d){
+  const v=toMMDD(m,d);
+  for(let i=0;i<KOU.length;i++){
+    const[s,e]=KOU[i].range;
+    if(s<=e){ if(v>=s&&v<=e)return i; }
+    else{ if(v>=s||v<=e)return i; }
+  }
+  return 0;
+}
+function suuhiNum(y,m,d){
+  let s=String(y)+String(m).padStart(2,"0")+String(d).padStart(2,"0");
+  let n=[...s].reduce((a,c)=>a+ +c,0);
+  while(n>9)n=[...String(n)].reduce((a,c)=>a+ +c,0);
+  return n===0?9:n;
+}
+
+function render(bi,n){
+  const k=KOU[bi];
+  const today=new Date();
+  const ti=findKou(today.getMonth()+1,today.getDate());
+  const dist=(ti-bi+12)%12;
+  const ky=KYOU[dist];
+  const tk=KOU[ti];
+
+  const frame=document.getElementById("artFrame");
+  const img=document.getElementById("artImg");
+  frame.classList.remove("show");
+  img.onload=()=>frame.classList.add("show");
+  img.onerror=()=>frame.classList.remove("show");
+  img.src="img/"+(bi+1)+".jpg";
+  img.alt="歌川広重「名所江戸百景 "+k.art+"」";
+  document.getElementById("artCredit").textContent="歌川広重「名所江戸百景 "+k.art+"」(国立国会図書館蔵・保護期間満了)";
+
+  document.getElementById("sekkiLabel").textContent="二十四節気「"+k.sekki+"」のころ("+k.dateLabel+"生まれ)";
+  document.getElementById("kouName").textContent=k.name;
+  document.getElementById("kouYomi").textContent=k.yomi;
+  document.getElementById("poem").textContent=k.poem;
+  document.getElementById("poemAuthor").textContent=k.author;
+
+  let copy, body;
+  if(n){
+    const s=SUUHI[n];
+    copy="「"+k.essence+"」× "+s.name+"の質";
+    body=k.body+" さらにあなたには「"+s.text+"」という数の質(数秘"+n+")が重なります。季節の力と数の力、ふたつを合わせ持つのがあなたです。";
+    document.getElementById("suuhiTag").textContent="数秘 "+n+"・"+s.name+" ／ 縁のもの:"+k.lucky;
+  }else{
+    copy="「"+k.essence+"」";
+    body=k.body+" 生年月日を入れて占うと、あなただけの「数の質」が加わります。";
+    document.getElementById("suuhiTag").textContent="縁のもの:"+k.lucky;
+  }
+  document.getElementById("honshitsuCopy").textContent=copy;
+  document.getElementById("honshitsuBody").textContent=body;
+
+  document.getElementById("kyouKou").textContent="今日は「"+tk.name+"("+tk.yomi+")」のころ";
+  document.getElementById("kyouLevel").textContent=ky.level;
+  document.getElementById("kyouBody").textContent=ky.text;
+
+  const url=location.href.split("#")[0];
+  const shareText="私の生まれは七十二候「"+k.name+"("+k.yomi+")」――"+k.essence+"。今日の運勢は"+ky.level+"でした。 #風月暦";
+  document.getElementById("shareX").href="https://twitter.com/intent/tweet?text="+encodeURIComponent(shareText)+"&url="+encodeURIComponent(url);
+  document.getElementById("shareLine").href="https://social-plugins.line.me/lineit/share?url="+encodeURIComponent(url)+"&text="+encodeURIComponent(shareText);
+
+  renderTokubetsu(ky);
+
+  current={k,n,ky,bi};
+  const r=document.getElementById("result");
+  r.style.display="block";
+  r.scrollIntoView({behavior:"smooth"});
+}
+
+let lastMD=null; // 誕生日判定用
+function uranau(){
+  const y=+document.getElementById("year").value;
+  const m=+document.getElementById("month").value;
+  const d=+document.getElementById("day").value;
+  lastMD={m,d};
+  render(findKou(m,d), suuhiNum(y,m,d));
+}
+function showKou(i){ lastMD=null; render(i,null); }
+
+// 特別演出:誕生日=白鳳(最稀)>大吉=旭日鳳凰
+function renderTokubetsu(ky){
+  const box=document.getElementById("tokubetsu");
+  box.classList.remove("show");
+  const today=new Date();
+  const isBirthday=lastMD && lastMD.m===today.getMonth()+1 && lastMD.d===today.getDate();
+  let mode=null;
+  if(isBirthday)mode="hakuho";
+  else if(ky.level==="大吉")mode="daikichi";
+  if(!mode)return;
+  const img=document.getElementById("tImg");
+  if(mode==="hakuho"){
+    document.getElementById("tLabel").textContent="誕生日の白鳳";
+    img.alt="伊藤若冲「老松白鳳図」";
+    document.getElementById("tCredit").textContent="伊藤若冲「老松白鳳図」";
+    document.getElementById("tText").textContent="お誕生日おめでとうございます。年にただ一日、生まれた日にだけ、白い鳳凰が舞い降ります。あなたの新しい一年が、良き巡りでありますように。";
+  }else{
+    document.getElementById("tLabel").textContent="鳳凰、来たる";
+    img.alt="伊藤若冲「旭日鳳凰図」";
+    document.getElementById("tCredit").textContent="伊藤若冲「旭日鳳凰図」";
+    document.getElementById("tText").textContent="生まれの候と今日の候が重なる、年に数日だけの大吉。旭日とともに鳳凰が舞い降りました。めったに出ない一枚です——どうぞ良い一日を。";
+  }
+  img.onload=()=>box.classList.add("show");
+  img.onerror=()=>box.classList.remove("show");
+  img.src="img/"+mode+".jpg";
+}
+function resetView(){
+  document.getElementById("result").style.display="none";
+  document.getElementById("uranai").scrollIntoView({behavior:"smooth"});
+}
+
+// ===== OS共有(インスタ・TikTok等はここから) =====
+async function osShare(){
+  if(!current)return;
+  const url=location.href.split("#")[0];
+  const text="私の生まれは七十二候「"+current.k.name+"」――"+current.k.essence+"。今日の運勢は"+current.ky.level+"。 #風月暦";
+  try{
+    const blob=await makeCardBlob();
+    if(blob && navigator.canShare && navigator.canShare({files:[new File([blob],"koyomiura.png",{type:"image/png"})]})){
+      await navigator.share({files:[new File([blob],"koyomiura.png",{type:"image/png"})],title:"風月暦",text:text});
+      return;
+    }
+  }catch(e){}
+  try{
+    if(navigator.share){ await navigator.share({title:"風月暦",text:text,url:url}); return; }
+  }catch(e){}
+  alert("この端末では共有機能が使えません。「結果カードを保存」から画像を保存して投稿してください。");
+}
+
+// ===== 結果カード生成(1080×1920) =====
+function drawVertical(ctx,text,x,y,size,gap){
+  ctx.font="500 "+size+"px 'Shippori Mincho',serif";
+  let cy=y;
+  for(const ch of text){
+    if(ch===" "){cy+=size*0.5;continue;}
+    ctx.fillText(ch,x,cy);
+    cy+=size+gap;
+  }
+  return cy;
+}
+async function makeCardBlob(){
+  if(!current)return null;
+  const k=current.k, ky=current.ky;
+  const c=document.getElementById("cardCanvas");
+  const ctx=c.getContext("2d");
+  const W=1080,H=1920;
+  // 背景
+  ctx.fillStyle="#FFFFFF";ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle="#1F1F1C";ctx.lineWidth=4;
+  ctx.strokeRect(40,40,W-80,H-80);
+  // 広重の絵(読み込めた時だけ・最大高さ620pxに制限)
+  const img=document.getElementById("artImg");
+  let y=150;
+  if(img.complete && img.naturalWidth>0){
+    try{
+      let ah=620, aw=ah*img.naturalWidth/img.naturalHeight;
+      if(aw>560){aw=560;ah=aw*img.naturalHeight/img.naturalWidth;}
+      ctx.drawImage(img,(W-aw)/2,100,aw,ah);
+      y=100+ah+50;
+    }catch(e){y=200;}
+  }else{y=220;}
+  // 節気・候名・読み・本質(上から順に積む)
+  ctx.textBaseline="top";ctx.textAlign="center";
+  ctx.fillStyle="#A08A52";
+  ctx.font="400 30px 'Zen Kaku Gothic New',sans-serif";
+  ctx.fillText("二十四節気「"+k.sekki+"」のころ",W/2,y); y+=52;
+  ctx.fillStyle="#1F1F1C";
+  ctx.font="500 116px 'Shippori Mincho',serif";
+  ctx.fillText(k.name,W/2,y); y+=140;
+  ctx.font="400 34px 'Shippori Mincho',serif";
+  ctx.fillStyle="#5A5A52";
+  ctx.fillText(k.yomi,W/2,y); y+=64;
+  ctx.fillStyle="#1F1F1C";
+  ctx.font="500 50px 'Shippori Mincho',serif";
+  ctx.fillText("「"+k.essence+"」",W/2,y); y+=95;
+  // 和歌(縦書き・右から左へ。長さを測ってから描く)
+  const phrases=k.poem.split(" ");
+  const size=42, gap=8, colGap=84;
+  const maxLen=Math.max(...phrases.map(p=>p.length));
+  const totalW=(phrases.length-1)*colGap;
+  const x0=W/2+totalW/2;
+  ctx.fillStyle="#1F1F1C";
+  phrases.forEach((ph,i)=>{ drawVertical(ctx,ph,x0-i*colGap,y,size,gap); });
+  y+=maxLen*(size+gap)+70; // 和歌の下端+余白
+  // 運勢(和歌の実寸の下に配置=重なり防止)
+  ctx.textAlign="center";
+  ctx.fillStyle="#5A5A52";ctx.font="400 30px 'Zen Kaku Gothic New',sans-serif";
+  ctx.fillText("今日の運勢",W/2,y); y+=48;
+  ctx.fillStyle="#C8321E";ctx.font="700 96px 'Shippori Mincho',serif";
+  ctx.fillText(ky.level,W/2,y);
+  // 落款+URL(最下部固定)
+  ctx.fillStyle="#C8321E";ctx.fillRect(W-170,H-190,90,90);
+  ctx.fillStyle="#FFF";ctx.font="700 36px 'Shippori Mincho',serif";
+  ctx.fillText("風月",W-125,H-165);
+  ctx.fillStyle="#5A5A52";ctx.textAlign="left";
+  ctx.font="400 26px 'Zen Kaku Gothic New',sans-serif";
+  ctx.fillText(location.host+location.pathname,80,H-160);
+  return new Promise(res=>c.toBlob(res,"image/png"));
+}
+async function saveCard(){
+  const blob=await makeCardBlob();
+  if(!blob){alert("先に占ってください。");return;}
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download="fugetsugoyomi_"+(current?current.k.name:"card")+".png";
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+// ===== 初期化 =====
+(function init(){
+  const ys=document.getElementById("year"),ms=document.getElementById("month"),ds=document.getElementById("day");
+  const now=new Date().getFullYear();
+  for(let y=now;y>=1930;y--)ys.add(new Option(y+"年",y));
+  ys.value=1980;
+  for(let m=1;m<=12;m++)ms.add(new Option(m+"月",m));
+  function fillDays(){
+    const y=+ys.value,m=+ms.value,max=new Date(y,m,0).getDate(),cur=+ds.value||1;
+    ds.innerHTML="";
+    for(let d=1;d<=max;d++)ds.add(new Option(d+"日",d));
+    ds.value=Math.min(cur,max);
+  }
+  ys.onchange=fillDays;ms.onchange=fillDays;fillDays();
+
+  // ヒーロー画像(あれば表示)
+  const hi=document.getElementById("heroImg");
+  hi.onload=()=>document.getElementById("heroArt").classList.add("show");
+  hi.onerror=()=>document.getElementById("heroArt").classList.remove("show");
+
+  // 候一覧(章扉=若冲)
+  const SEASON_ART={
+    "春":{f:"season_spring.jpg",t:"桃花小禽図"},
+    "夏":{f:"season_summer.jpg",t:"紫陽花双鶏図"},
+    "秋":{f:"season_autumn.jpg",t:"紅葉小禽図"},
+    "冬":{f:"season_winter.jpg",t:"雪中錦鶏図"},
+  };
+  const list=document.getElementById("kouList");
+  ["春","夏","秋","冬"].forEach(sn=>{
+    const banner=document.createElement("div");
+    banner.className="season-banner";
+    const sa=SEASON_ART[sn];
+    banner.innerHTML='<img src="img/'+sa.f+'" alt="伊藤若冲「'+sa.t+'」" onerror="this.style.display=\'none\'">'
+      +'<div><div class="season-label">'+sn+'</div>'
+      +'<div class="season-credit">伊藤若冲「'+sa.t+'」</div></div>';
+    list.appendChild(banner);
+    const grid=document.createElement("div");
+    grid.className="kou-grid";
+    KOU.forEach((k,i)=>{
+      if(k.season!==sn)return;
+      const cell=document.createElement("div");
+      cell.className="kou-cell";
+      cell.setAttribute("role","button");
+      cell.setAttribute("tabindex","0");
+      cell.innerHTML='<div class="n">'+k.name+'</div><div class="y">'+k.yomi+'</div><div class="d">'+k.dateLabel+'</div>';
+      cell.onclick=()=>showKou(i);
+      cell.onkeydown=e=>{if(e.key==="Enter"||e.key===" ")showKou(i);};
+      grid.appendChild(cell);
+    });
+    list.appendChild(grid);
+  });
+})();
+</script>
+</body>
+</html>
